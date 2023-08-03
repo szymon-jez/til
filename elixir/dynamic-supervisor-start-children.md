@@ -48,7 +48,11 @@ The above `DynamicSupervisor` can be started by a supervisor in addition to a ta
 ```elixir
 children = [
   ExampleDynamicSupervisor,
-  {Task, &ExampleDynamicSupervisor.start_children/0}
+  %{
+    id: Task,
+    start: {Task, :start, [&&ExampleDynamicSupervisor.start_children/0]},
+    restart: :permanent
+  }
 ]
 
 opts = [strategy: :rest_for_one]
@@ -56,4 +60,4 @@ opts = [strategy: :rest_for_one]
 Supervisor.start_link(children, opts)
 ```
 
-The `rest_for_one` supervisor strategy ensures that if the dynamic supervisor process crashes it will also terminate the task. On restart, both the dynamic supervisor and the task to start all children will be started.
+The `rest_for_one` supervisor strategy ensures that if the dynamic supervisor process crashes it will also terminate the task. On restart, both the dynamic supervisor and the task to start all children will be started. The task's restart strategy has to be explicitly set to `:permament` as it is by default `:temporary`. `:temporary` would not case it's restart after the `ExampleDynamicSupervisor` would be restarted.
